@@ -8,3 +8,4 @@ To change your desired resolution, edit macro IM_WIDTH, IM_HEIGHT inside video_c
 
 Press 'q' and enter to stop query(borrow the idea from OpenCV waitKey function)
 
+![crop](https://cloud.githubusercontent.com/assets/16308037/21586605/dbcd6192-d10d-11e6-86d8-a9c4ed490f5b.jpg)
