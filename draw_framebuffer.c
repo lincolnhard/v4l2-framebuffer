@@ -46,7 +46,7 @@ void init_framebuffer() {
 			vinfo.xoffset, vinfo.yoffset, vinfo.xres, vinfo.yres, vinfo.bits_per_pixel, finfo.line_length);
 
 	fbp = (char *) mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if ((int) fbp == -1) {
+	if (fbp == (char *)-1) {
 		perror("Error mapping framebuffer device to memory");
 		exit(EXIT_FAILURE);
 	}
