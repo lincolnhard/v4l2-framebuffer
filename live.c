@@ -14,8 +14,8 @@
 #include "draw_framebuffer.h"
 
 int main(void) {
-	unsigned char src_image[IM_WIDTH * IM_HEIGHT];
-	init_framebuffer();
+    unsigned char src_image[IM_WIDTH * IM_HEIGHT * 3];
+    init_framebuffer();
 	init_video_capture();
 	char key = 0;
 
@@ -26,7 +26,7 @@ int main(void) {
 			break;
 		}
 	}
-	free_video_capture();
+    free_video_capture();
 	free_framebuffer();
 	return EXIT_SUCCESS;
 }

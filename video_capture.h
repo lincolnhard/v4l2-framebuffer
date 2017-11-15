@@ -9,8 +9,8 @@
 #define VIDEO_CAPTURE_H_
 
 /* check the supported webcam resolutions using $v4l2-ctl --list-formats-ext */
-#define IM_WIDTH 320
-#define IM_HEIGHT 240
+#define IM_WIDTH 640
+#define IM_HEIGHT 480
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 
 struct buffer {

@@ -7,14 +7,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
-#include <fcntl.h> /* low-level i/o control (open)*/
+#include <fcntl.h>              /* low-level i/o control (open)*/
 #include <errno.h>
-#include <string.h> /* strerror show errno meaning */
-#include <sys/stat.h> /* getting information about files attributes */
-#include <linux/videodev2.h> /* v4l2 structure */
-#include <sys/mman.h> /* memory mapping */
-#include <unistd.h> /* read write close */
-#include <sys/time.h> /* for select time */
+#include <string.h>             /* strerror show errno meaning */
+#include <sys/stat.h>           /* getting information about files attributes */
+#include <linux/videodev2.h>    /* v4l2 structure */
+#include <sys/mman.h>           /* memory mapping */
+#include <unistd.h>             /* read write close */
+#include <sys/time.h>           /* for select time */
+#include <limits.h>             /* for UCHAR_MAX */
 #include "video_capture.h"
 
 
@@ -199,6 +200,39 @@ static void uninit_device() {
 	free(buffers);
 }
 
+static void parse_im(const unsigned char *im_yuv, unsigned char *dst){
+    const int IM_SIZE = IM_WIDTH * IM_HEIGHT;
+    unsigned char Y = 0;
+    unsigned char U = 0;
+    unsigned char V = 0;
+    int B = 0;
+    int G = 0;
+    int R = 0;
+    int i;
+    for(i = 0; i < IM_SIZE; ++i){
+        if(!(i & 1)){
+            U = im_yuv[2 * i + 1];
+            V = im_yuv[2 * i + 3];
+        }
+        Y = im_yuv[2 * i];
+        B = Y + 1.773 * (U - 128);
+        G = Y - 0.344 * (U - 128) - (0.714 * (V - 128));
+        R = Y + 1.403 * (V - 128);
+        if(B > UCHAR_MAX){
+            B = UCHAR_MAX;
+        }
+        if(G > UCHAR_MAX){
+            G = UCHAR_MAX;
+        }
+        if(R > UCHAR_MAX){
+            R = UCHAR_MAX;
+        }
+        dst[3*i] = B;
+        dst[3*i+1] = G;
+        dst[3*i+2] = R;
+    }
+}
+
 void init_video_capture(){
 	open_device();
 	init_device();
@@ -206,7 +240,6 @@ void init_video_capture(){
 }
 
 char video_capture(unsigned char* dst){
-	const int IM_SIZE = IM_WIDTH * IM_HEIGHT;
 	char key = 0;
 	FD_ZERO(&fds);
 	FD_SET(fd, &fds);
@@ -235,16 +268,10 @@ char video_capture(unsigned char* dst){
 				errno_exit("VIDIOC_DQBUF");
 			}
 		}
-		/* give Y channel to destination pointer */
+
 		unsigned char* im_from_cam = (unsigned char*)buffers[buf_in_while_loop.index].start;
-#if 0
-		memcpy(dst, im_from_cam, dstlen);
-#else
-		int i;
-		for(i = 0; i < IM_SIZE; i++){
-			dst[i] = im_from_cam[2 * i];
-		}
-#endif
+        parse_im(im_from_cam, dst);
+
 		/* queue-in buffer */
 		if(-1 == xioctl(fd, VIDIOC_QBUF, &buf_in_while_loop)){
 			errno_exit("VIDIOC_QBUF");
