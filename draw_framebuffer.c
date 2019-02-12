@@ -76,17 +76,20 @@ void init_framebuffer
 		}
 }
 
-void draw_framebuffer(unsigned char* src){
+void draw_framebuffer(unsigned char* src)
+{
 	int x, y;
 	unsigned int location = 0;
 	int i = 0;
-	for(y = 0; y < IM_HEIGHT; y++){
-		for(x = 0; x < IM_WIDTH; x++){
+	for(y = 0; y < IM_HEIGHT; y++)
+		{
+		for(x = 0; x < IM_WIDTH; x++)
+			{
 			location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel >> 3) + (y + vinfo.yoffset) * finfo.line_length;
-            *(fbp + location) = src[i*3];           //B
-            *(fbp + location + 1) = src[i*3 + 1];	//G
-            *(fbp + location + 2) = src[i*3 + 2];	//R
+            		*(fbp + location) = src[i*3];           //B
+            		*(fbp + location + 1) = src[i*3 + 1];	//G
+            		*(fbp + location + 2) = src[i*3 + 2];	//R
 			i++;
+			}
 		}
-	}
 }
