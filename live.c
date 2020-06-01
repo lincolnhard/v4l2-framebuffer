@@ -8,20 +8,35 @@
  ============================================================================
  */
 
+#include "draw_framebuffer.h"
+#include "video_capture.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "video_capture.h"
-#include "draw_framebuffer.h"
+#include <unistd.h>
 
-int main(void) {
-    unsigned char src_image[IM_WIDTH * IM_HEIGHT * 3];
+/* check the supported webcam resolutions using $v4l2-ctl --list-formats-ext */
+
+int main(int argc, char** argv) {
+	int width = 0, height = 0;
+
+	if (argc >= 1) width = atoi(argv[0]);
+	if (argc >= 2) height = atoi(argv[1]);
+
+	if (width == 0) width = 640;
+	if (height == 0) height = 480;
+
+	printf("Using size: %dx%d.\n", width, height);
+	usleep(1 * 1000000); // sleep one second
+
+    unsigned char src_image[width * height * 3];
     init_framebuffer();
-	init_video_capture();
+	init_video_capture(width, height);
 	char key = 0;
 
 	for(; ;){
-		key = video_capture(src_image);
-		draw_framebuffer(src_image);
+		key = video_capture(src_image, width, height);
+		draw_framebuffer(src_image, width, height);
 		if(key == 'q'){
 			break;
 		}

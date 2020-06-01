@@ -4,6 +4,8 @@
  *  Created on: Dec 24, 2015
  *      Author: Lincoln
  */
+#include "video_capture.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
@@ -16,7 +18,6 @@
 #include <unistd.h>             /* read write close */
 #include <sys/time.h>           /* for select time */
 #include <limits.h>             /* for UCHAR_MAX */
-#include "video_capture.h"
 
 
 static char* dev_name = "/dev/video0";
@@ -115,7 +116,7 @@ static void init_mmap() {
 }
 
 /* set video streaming format here(width, height, pixel format, cropping, scaling) */
-static void init_device() {
+static void init_device(int width, int height) {
 	struct v4l2_capability cap;
 	struct v4l2_format fmt;
 	unsigned int min;
@@ -137,8 +138,8 @@ static void init_device() {
 	}
 	CLEAR(fmt);
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	fmt.fmt.pix.width = IM_WIDTH;
-	fmt.fmt.pix.height = IM_HEIGHT;
+	fmt.fmt.pix.width = width;
+	fmt.fmt.pix.height = height;
 	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
 	fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 	if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt)){
@@ -200,8 +201,8 @@ static void uninit_device() {
 	free(buffers);
 }
 
-static void parse_im(const unsigned char *im_yuv, unsigned char *dst){
-    const int IM_SIZE = IM_WIDTH * IM_HEIGHT;
+static void parse_im(const unsigned char *im_yuv, unsigned char *dst, int width, int height) {
+    const int IM_SIZE = width * height;
     unsigned char Y = 0;
     unsigned char U = 0;
     unsigned char V = 0;
@@ -233,13 +234,13 @@ static void parse_im(const unsigned char *im_yuv, unsigned char *dst){
     }
 }
 
-void init_video_capture(){
+void init_video_capture(int width, int height){
 	open_device();
-	init_device();
+	init_device(width, height);
 	start_capturing();
 }
 
-char video_capture(unsigned char* dst){
+char video_capture(unsigned char* dst, int width, int height){
 	char key = 0;
 	FD_ZERO(&fds);
 	FD_SET(fd, &fds);
@@ -270,7 +271,7 @@ char video_capture(unsigned char* dst){
 		}
 
 		unsigned char* im_from_cam = (unsigned char*)buffers[buf_in_while_loop.index].start;
-        parse_im(im_from_cam, dst);
+        parse_im(im_from_cam, dst, width, height);
 
 		/* queue-in buffer */
 		if(-1 == xioctl(fd, VIDIOC_QBUF, &buf_in_while_loop)){
