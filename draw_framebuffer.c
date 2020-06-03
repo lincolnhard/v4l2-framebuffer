@@ -4,14 +4,15 @@
  *  Created on: Dec 24, 2015
  *      Author: Lincoln
  */
+#include "draw_framebuffer.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <linux/fb.h> /* for frame buffer */
+#include <linux/fb.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include "video_capture.h"
 
 static int fd = -1;
 struct fb_var_screeninfo vinfo;
@@ -55,7 +56,7 @@ void init_framebuffer
 
 	printf("xoffset: %d, yoffset: %d\nxres: %d, yres: %d\nbits_per_pixel: %d, line_length: %d\n",
 			vinfo.xoffset, vinfo.yoffset, vinfo.xres, vinfo.yres, vinfo.bits_per_pixel, finfo.line_length);
-#if 0
+/*
 	vinfo.xres = 800;
 	vinfo.yres = 600;
 	if (ioctl(fd, FBIOPUT_VSCREENINFO, &vinfo) == -1)
@@ -67,7 +68,7 @@ void init_framebuffer
 
 	printf("xoffset: %d, yoffset: %d\nxres: %d, yres: %d\nbits_per_pixel: %d, line_length: %d\n",
 			vinfo.xoffset, vinfo.yoffset, vinfo.xres, vinfo.yres, vinfo.bits_per_pixel, finfo.line_length);
-#endif
+*/
 	fbp = mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (fbp == (char *)-1) 
 		{
@@ -76,14 +77,14 @@ void init_framebuffer
 		}
 }
 
-void draw_framebuffer(unsigned char* src)
+void draw_framebuffer(unsigned char* src, int width, int height)
 {
 	int x, y;
 	unsigned int location = 0;
 	int i = 0;
-	for(y = 0; y < IM_HEIGHT; y++)
+	for(y = 0; y < height; y++)
 		{
-		for(x = 0; x < IM_WIDTH; x++)
+		for(x = 0; x < width; x++)
 			{
 			location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel >> 3) + (y + vinfo.yoffset) * finfo.line_length;
             		*(fbp + location) = src[i*3];           //B

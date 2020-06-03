@@ -8,9 +8,8 @@
 #ifndef VIDEO_CAPTURE_H_
 #define VIDEO_CAPTURE_H_
 
-/* check the supported webcam resolutions using $v4l2-ctl --list-formats-ext */
-#define IM_WIDTH 640
-#define IM_HEIGHT 480
+#include <stddef.h>
+
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 
 struct buffer {
@@ -18,8 +17,8 @@ struct buffer {
 	size_t length;
 };
 
-void init_video_capture();
-char video_capture(unsigned char* dst);
+void init_video_capture(int width, int height);
+char video_capture(unsigned char* dst, int width, int height);
 void free_video_capture();
 
 #endif /* VIDEO_CAPTURE_H_ */
