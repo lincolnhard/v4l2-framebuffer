@@ -12,8 +12,8 @@ OBJECTS	:= $(addprefix $(BUILD)/,$(SOURCES:%.c=%.o))
 
 #------------------------------------------------
 
-CFLAGS	:= -Wall -g $(shell pkg-config libv4l1 --cflags)
-LDFLAGS	:= -lc $(shell pkg-config libv4l1 --libs)
+CFLAGS	:= -Wall -g
+LDFLAGS	:= -lc
 
 #------------------------------------------------
 all: $(NAME)
